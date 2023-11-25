@@ -2,5 +2,9 @@ from django.shortcuts import render,HttpResponse
 
 # Create your views here.
 def home(request):
-    return HttpResponse("This is Home page")
+    context={}
+    return render(request,'bookblogapp/index.html',context)
 
+def books(request):
+    context={}
+    return render(request,'bookblogapp/index.html',context)
