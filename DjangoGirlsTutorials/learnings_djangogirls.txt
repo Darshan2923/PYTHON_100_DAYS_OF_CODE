@@ -117,3 +117,4 @@ command-line
 $
 
 https://tutorial.djangogirls.org/en/django_orm/
+https://docs.djangoproject.com/en/3.2/ref/models/querysets/
