@@ -4,11 +4,9 @@
 This is the one and only home page...
 
 <div class="comment-form">
-    <form action="" method="POST">
-        {%csrf_token%}
-        <input type="text" name="bookname" placeholder="Write your book here...">
-        <input type="text" name="bookprice" placeholder="Write your book price here...">
-        <input type="text" name="bookauthor" placeholder="Write your book author here...">
+    <form method="post" action="{% url 'books' %}">
+        {% csrf_token %}
+        {{ bookform.as_p }}
         <input type="submit" value="Submit">
     </form>
 </div>
