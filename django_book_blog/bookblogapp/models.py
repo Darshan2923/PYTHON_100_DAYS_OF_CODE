@@ -9,4 +9,4 @@ class CreateBook(models.Model):
     bookauthor=models.CharField(max_length=200)
 
     def __str__(self):
-        return self.bookname
+        return self.bookprice
