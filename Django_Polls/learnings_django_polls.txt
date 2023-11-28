@@ -31,3 +31,12 @@ Naming your URL lets you refer to it unambiguously from elsewhere in Django, esp
 When you’re comfortable with the basic request and response flow, read part 2 of this tutorial to start working with the database.
 
 
+Django Models
+
+py manage.py migrate
+The migrate command looks at the INSTALLED_APPS setting and creates any necessary database tables according to the database settings in your mysite/settings.py file and the database migrations shipped with the app (we’ll cover those later). You’ll see a message for each migration it applies. If you’re interested, run the command-line client for your database and type \dt (PostgreSQL), SHOW TABLES; (MariaDB, MySQL), .schema (SQLite), or SELECT TABLE_NAME FROM USER_TABLES; (Oracle) to display the tables Django created.
+
+ python manage.py sqlmigrate pollsapp 0001 to get more gist of what migrations are applied to the django models.
+
+ 
+
