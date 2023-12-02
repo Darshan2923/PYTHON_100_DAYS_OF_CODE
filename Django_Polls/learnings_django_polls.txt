@@ -199,7 +199,7 @@ urlpatterns = [
     path('<int:question_id>/vote/', views.vote, name='vote'),
 ]
 
-And normal urls to: <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
+And normal urls to: <li><a href="{% url 'pollsapp:detail' question.id %}">{{ question.question_text }}</a></li>
 
 
 

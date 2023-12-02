@@ -1,10 +1,27 @@
-<h1>{{ question.question_text }}</h1>
+<!-- Did earlier, creating a  minimal form below -->
+
+<!-- <h1>{{ question.question_text }}</h1>
 <ul>
     {% for choice in question.choice_set.all %}
     <li>{{ choice.choice_text }}</li>
     {% endfor %}
-</ul>
-
+</ul> -->
+<!-- {Above code is giving some error of for loop should contain 4 keywords lmao} -->
 <!-- The template system uses dot-lookup syntax to access variable attributes. In the example of {{ question.question_text }}, first Django does a dictionary lookup on the object question. Failing that, it tries an attribute lookup – which works, in this case. If attribute lookup had failed, it would’ve tried a list-index lookup.
 
-Method-calling happens in the {% for %} loop: question.choice_set.all is interpreted as the Python code question.choice_set.all(), which returns an iterable of Choice objects and is suitable for use in the {% for %} tag. -->
+Method-calling happens in the  for  loop: question.choice_set.all is interpreted as the Python code question.choice_set.all(), which returns an iterable of Choice objects and is suitable for use in the  for  tag. -->
+
+<form action="{% url 'pollsapp:vote' question.id %}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        <legend>
+            <h1>{{ question.question_text }}</h1>
+        </legend>
+        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+        {% for choice in question.choice_set.all %}
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+        {% endfor %}
+    </fieldset>
+    <input type="submit" value="Vote">
+</form>
