@@ -432,6 +432,7 @@ Django’s STATICFILES_FINDERS setting contains a list of finders that know how 
 
 Within the static directory you have just created, create another directory called polls and within that create a file called style.css. In other words, your stylesheet should be at polls/static/polls/style.css. Because of how the AppDirectoriesFinder staticfile finder works, you can refer to this static file in Django as polls/style.css, similar to how you reference the path for templates.
 
+
 index.html
 {% load static %}
 

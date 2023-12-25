@@ -1,3 +1,7 @@
 li a {
-    color: green
+    color: yellow;
+}
+
+* {
+    background: white url("/img/bg_img_polls_aap.jpg") no-repeat;
 }
