@@ -76,7 +76,7 @@ datetime.datetime(2012, 2, 26, 13, 0, 0, 775217, tzinfo=<UTC>)
 <QuerySet [<Question: Question object (1)>]>
 
 
-After  foing this in models.py, do this:
+After  doing this in models.py, do this:
 import datetime
 
 from django.db import models
@@ -175,6 +175,8 @@ Year-based archive page – displays all months with entries in the given year.
 Month-based archive page – displays all days with entries in the given month.
 Day-based archive page – displays all entries in the given day.
 Comment action – handles posting comments to a given entry.
+
+
 In our poll application, we’ll have the following four views:
 
 Question “index” page – displays the latest few questions.
@@ -212,6 +214,73 @@ detail.html(earlier code)
 <!-- The template system uses dot-lookup syntax to access variable attributes. In the example of  question.question_text , first Django does a dictionary lookup on the object question. Failing that, it tries an attribute lookup – which works, in this case. If attribute lookup had failed, it would’ve tried a list-index lookup.
 
 Method-calling happens in the  for  loop: question.choice_set.all is interpreted as the Python code question.choice_set.all(), which returns an iterable of Choice objects and is suitable for use in the  for  tag. -->
+
+
+Create a template directory to distinguish between design and code in views
+
+Within the templates directory you have just created, create another directory called polls, and within that create a file called index.html. In other words, your template should be at polls/templates/polls/index.html. Because of how the app_directories template loader works as described above, you can refer to this template within Django as polls/index.html.
+
+views.py
+from django.shortcuts import render
+
+from .models import *
+
+
+def index(request):
+    latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    context = {'latest_question_list': latest_question_list}
+    return render(request, 'polls/index.html', context)
+
+def detail(request):
+    question=get_object_or_404(Question,pk=question_id)
+    return render(request,'pollsapp/detail.html',{'question':question})
+
+detail.html
+<h1>{{ question.question_text }}</h1>
+<ul>
+{% for choice in question.choice_set.all %}
+    <li>{{ choice.choice_text }}</li>
+{% endfor %}
+</ul>
+
+
+index.html
+{% if latest_question_list %}
+    <ul>
+    {% for question in latest_question_list %}
+       <li><a href="{% url 'detail' question.id %}">{{ question.question_text }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}
+
+
+detail.html
+<form action="{% url 'polls:vote' question.id %}" method="post">
+{% csrf_token %}
+<fieldset>
+    <legend><h1>{{ question.question_text }}</h1></legend>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+    {% for choice in question.choice_set.all %}
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+    {% endfor %}
+</fieldset>
+<input type="submit" value="Vote">
+</form>
+
+csrf:-Cross Site Request Forgeries.
+ The value of each radio button is the associated question choice’s ID. The name of each radio button is "choice". That means, when somebody selects one of the radio buttons and submits the form, it’ll send the POST data choice=# where # is the ID of the selected choice.
+
+
+
+
+
+
+
+
+
 
 
 
