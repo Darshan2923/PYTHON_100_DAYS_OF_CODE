@@ -1,9 +1,9 @@
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render,HttpResponse,redirect
 from django.template import loader
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 # Create your views here.
-from .models import Question
+from .models import *
 
 
 # def index(request):
@@ -34,8 +34,18 @@ def detail(request, question_id):
 # There’s also a get_list_or_404() function, which works just as get_object_or_404() – except using filter() instead of get(). It raises Http404 if the list is empty.
 
 def results(request, question_id):
-    response = "You're looking at the results of question %s."
-    return HttpResponse(response % question_id)
+    question=get_object_or_404(Question,pk=question_id)
+    return render(request,'pollsapp/results.html',{'question':question})
 
 def vote(request, question_id):
-    return HttpResponse("You're voting on question %s." % question_id)
+    question=get_object_or_404(Question,pk=question_id)
+    try:
+        selected_choice=question.choice_set.get(pk=request.POST['choice'])
+    except(KeyError,Choice.DoesNotExist):
+        # Redisplay the question voting form.
+        context={'question':question,'error_message':"You didn't select a choice"}
+        return render(request,'pollsapp/detail.html',context)
+    else:
+        selected_choice.votes+=1
+        selected_choice.save()
+    return redirect('pollsapp:results', question_id=question.id)
