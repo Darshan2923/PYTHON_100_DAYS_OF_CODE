@@ -318,8 +318,124 @@ results.html
 
 <a href="{% url 'polls:detail' question.id %}">Vote again?</a>
 
+Search race condition for problem in the app
+
+Use generic views:shorten the code
+For more, search on tutorial 4 , i am not incorporating this shit in my code
 
 
+Tutorial 5: Intro to automated testing
+What’s different in automated tests is that the testing work is done for you by the system. You create a set of tests once, and then as you make changes to your app, you can check that your code still works as you originally intended, without having to perform time consuming manual testing.
+
+Basic testing strategies
+Some programmers follow a discipline called “test-driven development”; they actually write their tests before they write their code.
+
+
+Fortunately, there’s a little bug in the polls application for us to fix right away: the Question.was_published_recently() method returns True if the Question was published within the last day (which is correct) but also if the Question’s pub_date field is in the future (which certainly isn’t).
+
+Confirm the bug by using the shell to check the method on a question whose date lies in the future:
+
+$ python manage.py shell
+>>> import datetime
+>>> from django.utils import timezone
+>>> from polls.models import Question
+>>> # create a Question instance with pub_date 30 days in the future
+>>> future_question = Question(pub_date=timezone.now() + datetime.timedelta(days=30))
+>>> # was it published recently?
+>>> future_question.was_published_recently()
+True
+
+
+
+Creating the test to expose bug
+test.py
+import datetime
+
+from django.test import TestCase
+from django.utils import timezone
+
+from .models import Question
+
+
+class QuestionModelTests(TestCase):
+
+    def test_was_published_recently_with_future_question(self):
+        """
+        was_published_recently() returns False for questions whose pub_date
+        is in the future.
+        """
+        time = timezone.now() + datetime.timedelta(days=30)
+        future_question = Question(pub_date=time)
+        self.assertIs(future_question.was_published_recently(), False)
+
+$ python manage.py test polls
+
+Fix the bug
+models.py
+def was_published_recently(self):
+    now = timezone.now()
+    return now - datetime.timedelta(days=1) <= self.pub_date <= now
+What happened is:
+manage.py test polls looked for tests in the polls application
+it found a subclass of the django.test.TestCase class
+it created a special database for the purpose of testing
+it looked for test methods - ones whose names begin with test
+in test_was_published_recently_with_future_question it created a Question instance whose pub_date field is 30 days in the future
+… and using the assertIs() method, it discovered that its was_published_recently() returns True, though we wanted it to return False
+
+Fixed boom!!!
+
+Many programmers write test.py first in place of code its called test driven environment...
+
+The Django test client¶
+Django provides a test Client to simulate a user interacting with the code at the view level. We can use it in tests.py or even in the shell.
+
+$ python manage.py shell
+>>> from django.test.utils import setup_test_environment
+>>> setup_test_environment()
+
+
+>>> from django.test import Client
+>>> # create an instance of the client for our use
+>>> client = Client()
+With that ready, we can ask the client to do some work for us:
+
+>>> # get a response from '/'
+>>> response = client.get('/')
+Not Found: /
+>>> # we should expect a 404 from that address; if you instead see an
+>>> # "Invalid HTTP_HOST header" error and a 400 response, you probably
+>>> # omitted the setup_test_environment() call described earlier.
+>>> response.status_code
+404
+>>> # on the other hand we should expect to find something at '/polls/'
+>>> # we'll use 'reverse()' rather than a hardcoded URL
+>>> from django.urls import reverse
+>>> response = client.get(reverse('polls:index'))
+>>> response.status_code
+200
+>>> response.content
+b'\n    <ul>\n    \n        <li><a href="/polls/1/">What&#x27;s up?</a></li>\n    \n    </ul>\n\n'
+>>> response.context['latest_question_list']
+<QuerySet [<Question: What's up?>]>
+
+
+Tutorial6-Static files in Django
+For small projects, this isn’t a big deal, because you can keep the static files somewhere your web server can find it. However, in bigger projects – especially those comprised of multiple apps – dealing with the multiple sets of static files provided by each application starts to get tricky.
+
+That’s what django.contrib.staticfiles is for: it collects static files from each of your applications (and any other places you specify) into a single location that can easily be served in production.
+
+Customize apps look and feel:
+First, create a directory called static in your polls directory. Django will look for static files there, similarly to how Django finds templates inside polls/templates/.
+
+Django’s STATICFILES_FINDERS setting contains a list of finders that know how to discover static files from various sources. One of the defaults is AppDirectoriesFinder which looks for a “static” subdirectory in each of the INSTALLED_APPS, like the one in polls we just created. The admin site uses the same directory structure for its static files.
+
+Within the static directory you have just created, create another directory called polls and within that create a file called style.css. In other words, your stylesheet should be at polls/static/polls/style.css. Because of how the AppDirectoriesFinder staticfile finder works, you can refer to this static file in Django as polls/style.css, similar to how you reference the path for templates.
+
+index.html
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">
 
 
 
